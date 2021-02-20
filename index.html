@@ -69,6 +69,10 @@
         cursor: not-allowed;
         background: #666;
       }
+
+      .stat {
+        margin: 5px 0;
+      }
     </style>
   </head>
   <body>
@@ -78,16 +82,18 @@
         <button class="start">Start</button>
         <button class="random">Randomise</button>
         <button class="clear">Clear</button>
+        <button class="speed-plus">Speed +</button>
+        <button class="speed-minus">Speed -</button>
       </div>
-      <div class="stats">Generation: <span class="generation">0</span></div>
+      <div class="stat">Generation: <span class="generation">0</span></div>
     </div>
   </body>
   <script>
     // TODO: Figure out width and height based on screen dimensions
-    // TODO: set frame rate dynamically
     const WIDTH = 80;
     const HEIGHT = 50;
     let GENERATION = 0;
+    let SPEED = 2;
     let PLAYING = false;
     let OLD_GAME_STATE = false;
     let NEW_GAME_STATE = Array(HEIGHT).fill(Array(WIDTH).fill(0));
@@ -128,6 +134,22 @@
 
       render();
     });
+
+    document
+      .querySelector("button.speed-plus")
+      .addEventListener("click", (e) => {
+        e.preventDefault();
+
+        SPEED++;
+      });
+
+    document
+      .querySelector("button.speed-minus")
+      .addEventListener("click", (e) => {
+        e.preventDefault();
+
+        SPEED--;
+      });
 
     const main = document.querySelector(".main");
 
@@ -195,7 +217,7 @@
       render();
       GENERATION++;
       document.querySelector("span.generation").innerText = `${GENERATION}`;
-      PLAYING = setTimeout(next, 500);
+      PLAYING = setTimeout(next, 1000 / SPEED);
     }
   </script>
 </html>
