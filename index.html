@@ -16,12 +16,14 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+        font-family: system-ui;
       }
 
       .container {
         height: 100%;
         width: 100%;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
       }
@@ -42,23 +44,90 @@
       .cell.active {
         background: #2977f5;
       }
+
+      .controls {
+        width: 100%;
+        padding: 50px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .controls button {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        background: #2977f5;
+        color: white;
+        border: none;
+        padding: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 0 10px;
+      }
+
+      .controls button:disabled {
+        cursor: not-allowed;
+        background: #666;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="main"></div>
+      <div class="controls">
+        <button class="start">Start</button>
+        <button class="random">Randomise</button>
+        <button class="clear">Clear</button>
+      </div>
+      <div class="stats">Generation: <span class="generation">0</span></div>
     </div>
   </body>
   <script>
     // TODO: Figure out width and height based on screen dimensions
+    // TODO: set frame rate dynamically
     const WIDTH = 80;
     const HEIGHT = 50;
+    let GENERATION = 0;
     let PLAYING = false;
     let OLD_GAME_STATE = false;
-    let NEW_GAME_STATE = Array.from(Array(HEIGHT), () =>
-      // Array.from(Array(WIDTH), () => Math.round(Math.random()))
-      Array.from(Array(WIDTH), () => 0)
-    );
+    let NEW_GAME_STATE = Array(HEIGHT).fill(Array(WIDTH).fill(0));
+
+    document.querySelector("button.start").addEventListener("click", (e) => {
+      e.preventDefault();
+
+      if (PLAYING) {
+        clearTimeout(PLAYING);
+        PLAYING = false;
+        e.target.innerText = "start";
+      } else {
+        next();
+        e.target.innerText = "stop";
+      }
+    });
+
+    document.querySelector("button.random").addEventListener("click", (e) => {
+      e.preventDefault();
+
+      GENERATION = 0;
+      document.querySelector("span.generation").innerText = `${GENERATION}`;
+      OLD_GAME_STATE = NEW_GAME_STATE;
+      NEW_GAME_STATE = Array.from(Array(HEIGHT), () =>
+        Array.from(Array(WIDTH), () => Math.round(Math.random()))
+      );
+
+      render();
+    });
+
+    document.querySelector("button.clear").addEventListener("click", (e) => {
+      e.preventDefault();
+
+      GENERATION = 0;
+      document.querySelector("span.generation").innerText = `${GENERATION}`;
+      OLD_GAME_STATE = NEW_GAME_STATE;
+      NEW_GAME_STATE = Array(HEIGHT).fill(Array(WIDTH).fill(0));
+
+      render();
+    });
 
     const main = document.querySelector(".main");
 
@@ -70,21 +139,23 @@
         for (let x = 0; x < NEW_GAME_STATE[y].length; x++) {
           const cellDiv = document.createElement("div");
           cellDiv.classList.add("cell");
+          cellDiv.dataset.x = x;
+          cellDiv.dataset.y = y;
           if (NEW_GAME_STATE[y][x]) {
             cellDiv.classList.add("active");
           }
 
           cellDiv.addEventListener("click", (e) => {
             e.preventDefault();
-            if (!PLAYING) {
-              e.target.classList.toggle("active");
-              NEW_GAME_STATE[y][x] = true;
-            }
+            e.target.classList.toggle("active");
+            NEW_GAME_STATE[y][x] = true;
           });
 
           main.appendChild(cellDiv);
         }
       }
+
+      // TODO: check if OLD_GAME_STATE exists and diff
     }
 
     render();
@@ -122,8 +193,9 @@
       }
 
       render();
+      GENERATION++;
+      document.querySelector("span.generation").innerText = `${GENERATION}`;
+      PLAYING = setTimeout(next, 500);
     }
-
-    // TODO: add timeout for next function, button to set play state
   </script>
 </html>
