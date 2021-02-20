@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conway's Game of Life</title>
+    <style>
+      body,
+      html {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .main {
+        display: grid;
+        grid-template-columns: repeat(3, 11px);
+        grid-template-rows: repeat(3, 11px);
+        grid-gap: 1px;
+        background: #2977f520;
+        padding: 10px;
+      }
+
+      .cell {
+        background: #2977f550;
+      }
+
+      .cell.active {
+        background: #2977f5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="main"></div>
+    </div>
+  </body>
+  <script>
+    // TODO: Figure out width and height based on screen dimensions
+    const WIDTH = 80;
+    const HEIGHT = 50;
+    let PLAYING = false;
+    let OLD_GAME_STATE = false;
+    let NEW_GAME_STATE = Array.from(Array(HEIGHT), () =>
+      // Array.from(Array(WIDTH), () => Math.round(Math.random()))
+      Array.from(Array(WIDTH), () => 0)
+    );
+
+    const main = document.querySelector(".main");
+
+    function render() {
+      main.innerHTML = "";
+      main.style.gridTemplateColumns = `repeat(${WIDTH}, 11px)`;
+      main.style.gridTemplateRows = `repeat(${HEIGHT}, 11px)`;
+      for (let y = 0; y < NEW_GAME_STATE.length; y++) {
+        for (let x = 0; x < NEW_GAME_STATE[y].length; x++) {
+          const cellDiv = document.createElement("div");
+          cellDiv.classList.add("cell");
+          if (NEW_GAME_STATE[y][x]) {
+            cellDiv.classList.add("active");
+          }
+
+          cellDiv.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (!PLAYING) {
+              e.target.classList.toggle("active");
+              NEW_GAME_STATE[y][x] = true;
+            }
+          });
+
+          main.appendChild(cellDiv);
+        }
+      }
+    }
+
+    render();
+
+    function next() {
+      OLD_GAME_STATE = NEW_GAME_STATE;
+      NEW_GAME_STATE = [...OLD_GAME_STATE.map((row) => [...row])];
+
+      for (let y = 0; y < NEW_GAME_STATE.length; y++) {
+        for (let x = 0; x < NEW_GAME_STATE[y].length; x++) {
+          let neighbors = 0;
+          // Count neighbors
+          for (let yi = -1; yi < 2; yi++) {
+            for (let xi = -1; xi < 2; xi++) {
+              const newy = y + yi < 0 ? y + yi + HEIGHT : (y + yi) % HEIGHT;
+              const newx = x + xi < 0 ? x + xi + WIDTH : (x + xi) % WIDTH;
+              try {
+                neighbors += OLD_GAME_STATE[newy][newx];
+              } catch (e) {
+                console.log(e);
+                console.log({ newx, newy, y, x, yi, xi });
+              }
+            }
+          }
+          neighbors -= OLD_GAME_STATE[y][x];
+
+          if (neighbors > 3 || neighbors < 2) {
+            NEW_GAME_STATE[y][x] = 0;
+          }
+
+          if (neighbors === 3 && OLD_GAME_STATE[y][x] !== 1) {
+            NEW_GAME_STATE[y][x] = 1;
+          }
+        }
+      }
+
+      render();
+    }
+
+    // TODO: add timeout for next function, button to set play state
+  </script>
+</html>
