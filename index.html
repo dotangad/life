@@ -82,8 +82,6 @@
         <button class="start">Start</button>
         <button class="random">Randomise</button>
         <button class="clear">Clear</button>
-        <button class="speed-plus">Speed +</button>
-        <button class="speed-minus">Speed -</button>
       </div>
       <div class="stat">Generation: <span class="generation">0</span></div>
     </div>
@@ -93,7 +91,7 @@
     const WIDTH = 80;
     const HEIGHT = 50;
     let GENERATION = 0;
-    let SPEED = 2;
+    let FPS = 4;
     let PLAYING = false;
     let OLD_GAME_STATE = false;
     let NEW_GAME_STATE = Array(HEIGHT).fill(Array(WIDTH).fill(0));
@@ -135,22 +133,6 @@
       render();
     });
 
-    document
-      .querySelector("button.speed-plus")
-      .addEventListener("click", (e) => {
-        e.preventDefault();
-
-        SPEED++;
-      });
-
-    document
-      .querySelector("button.speed-minus")
-      .addEventListener("click", (e) => {
-        e.preventDefault();
-
-        SPEED--;
-      });
-
     const main = document.querySelector(".main");
 
     function render() {
@@ -166,12 +148,6 @@
           if (NEW_GAME_STATE[y][x]) {
             cellDiv.classList.add("active");
           }
-
-          cellDiv.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.target.classList.toggle("active");
-            NEW_GAME_STATE[y][x] = true;
-          });
 
           main.appendChild(cellDiv);
         }
@@ -217,7 +193,7 @@
       render();
       GENERATION++;
       document.querySelector("span.generation").innerText = `${GENERATION}`;
-      PLAYING = setTimeout(next, 1000 / SPEED);
+      PLAYING = setTimeout(next, 1000 / FPS);
     }
   </script>
 </html>
